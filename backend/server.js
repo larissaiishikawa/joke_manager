@@ -19,11 +19,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? [
-            "https://larissaiishikawa.github.io",
-            "https://joke-manager.vercel.app",
-            /https:\/\/.*\.vercel\.app$/
-          ]
+        ? process.env.CORS_ORIGIN || "https://larissaiishikawa.github.io"
         : ["http://localhost:3001", "http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
