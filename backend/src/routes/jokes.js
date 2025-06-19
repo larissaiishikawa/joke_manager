@@ -1,44 +1,40 @@
-const express = require('express');
-const { authMiddleware, createRateLimit } = require('../config/security');
-const Joke = require('../models/Joke');
-const cache = require('../config/cache');
-const winston = require('winston');
+const express = require("express");
+const { authMiddleware, createRateLimit } = require("../config/security");
+const Joke = require("../models/Joke");
+const cache = require("../config/cache");
+const winston = require("winston");
 
 const router = express.Router();
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.json()
   ),
   transports: [
-    new winston.transports.File({ filename: 'logs/jokes.log' }),
-    new winston.transports.Console()
-  ]
+    ...(process.env.NODE_ENV !== "production"
+      ? [new winston.transports.File({ filename: "logs/jokes.log" })]
+      : []),
+    new winston.transports.Console(),
+  ],
 });
 
 const searchLimiter = createRateLimit(
   60 * 1000,
   30,
-  'Too many search requests from this IP'
+  "Too many search requests from this IP"
 );
 
 const createLimiter = createRateLimit(
   60 * 1000,
   10,
-  'Too many joke creation requests from this IP'
+  "Too many joke creation requests from this IP"
 );
 
-router.get('/search', searchLimiter, async (req, res) => {
+router.get("/search", searchLimiter, async (req, res) => {
   try {
-    const { 
-      category, 
-      keyword, 
-      author, 
-      page = 1, 
-      limit = 10 
-    } = req.query;
+    const { category, keyword, author, page = 1, limit = 10 } = req.query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -46,7 +42,7 @@ router.get('/search', searchLimiter, async (req, res) => {
     if (pageNum < 1 || limitNum < 1 || limitNum > 50) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid pagination parameters'
+        message: "Invalid pagination parameters",
       });
     }
 
@@ -54,9 +50,9 @@ router.get('/search', searchLimiter, async (req, res) => {
     const cachedResult = await cache.get(cacheKey);
 
     if (cachedResult) {
-      logger.info('Search cache hit', { 
+      logger.info("Search cache hit", {
         query: req.query,
-        ip: req.ip 
+        ip: req.ip,
       });
       return res.json(cachedResult);
     }
@@ -70,20 +66,20 @@ router.get('/search', searchLimiter, async (req, res) => {
     const options = {
       skip,
       limit: limitNum,
-      sort: { createdAt: -1 }
+      sort: { createdAt: -1 },
     };
 
     const [jokes, totalCount] = await Promise.all([
       Joke.searchJokes(searchParams, options),
       Joke.countDocuments({
         ...buildSearchQuery(searchParams),
-        isActive: true
-      })
+        isActive: true,
+      }),
     ]);
 
     const result = {
       success: true,
-      message: 'Jokes retrieved successfully',
+      message: "Jokes retrieved successfully",
       data: {
         jokes,
         pagination: {
@@ -91,47 +87,53 @@ router.get('/search', searchLimiter, async (req, res) => {
           totalPages: Math.ceil(totalCount / limitNum),
           totalJokes: totalCount,
           hasNextPage: pageNum < Math.ceil(totalCount / limitNum),
-          hasPreviousPage: pageNum > 1
-        }
-      }
+          hasPreviousPage: pageNum > 1,
+        },
+      },
     };
 
     await cache.set(cacheKey, result, 300);
 
-    logger.info('Joke search performed', { 
+    logger.info("Joke search performed", {
       searchParams,
       resultCount: jokes.length,
       totalCount,
-      ip: req.ip 
+      ip: req.ip,
     });
 
     res.json(result);
-
   } catch (error) {
-    logger.error('Search error', { error: error.message, query: req.query });
+    logger.error("Search error", { error: error.message, query: req.query });
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 });
 
-router.post('/', authMiddleware, createLimiter, async (req, res) => {
+router.post("/", authMiddleware, createLimiter, async (req, res) => {
   try {
     const { title, content, category, author } = req.body;
 
     if (!title || !content || !category || !author) {
       return res.status(400).json({
         success: false,
-        message: 'All fields (title, content, category, author) are required'
+        message: "All fields (title, content, category, author) are required",
       });
     }
 
-    const validCategories = ['comedy', 'puns', 'dad-jokes', 'programming', 'dark-humor', 'one-liner'];
+    const validCategories = [
+      "comedy",
+      "puns",
+      "dad-jokes",
+      "programming",
+      "dark-humor",
+      "one-liner",
+    ];
     if (!validCategories.includes(category)) {
       return res.status(400).json({
         success: false,
-        message: `Category must be one of: ${validCategories.join(', ')}`
+        message: `Category must be one of: ${validCategories.join(", ")}`,
       });
     }
 
@@ -140,18 +142,18 @@ router.post('/', authMiddleware, createLimiter, async (req, res) => {
       content: content.trim(),
       category,
       author: author.trim(),
-      isActive: true
+      isActive: true,
     });
 
     if (existingJoke) {
-      logger.warn('Duplicate joke creation attempt', { 
+      logger.warn("Duplicate joke creation attempt", {
         title,
         userId: req.user.userId,
-        ip: req.ip 
+        ip: req.ip,
       });
       return res.status(409).json({
         success: false,
-        message: 'A joke with similar content already exists'
+        message: "A joke with similar content already exists",
       });
     }
 
@@ -160,55 +162,57 @@ router.post('/', authMiddleware, createLimiter, async (req, res) => {
       content: content.trim(),
       category,
       author: author.trim(),
-      createdBy: req.user.userId
+      createdBy: req.user.userId,
     });
 
     await newJoke.save();
-    await newJoke.populate('createdBy', 'username');
+    await newJoke.populate("createdBy", "username");
 
-    await cache.del('search_*');
+    await cache.del("search_*");
 
-    logger.info('New joke created', { 
+    logger.info("New joke created", {
       jokeId: newJoke._id,
       title: newJoke.title,
       category: newJoke.category,
       userId: req.user.userId,
-      ip: req.ip 
+      ip: req.ip,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Joke created successfully',
+      message: "Joke created successfully",
       data: {
-        joke: newJoke
-      }
+        joke: newJoke,
+      },
     });
-
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
-    logger.error('Joke creation error', { error: error.message, userId: req.user.userId });
+    logger.error("Joke creation error", {
+      error: error.message,
+      userId: req.user.userId,
+    });
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid joke ID format'
+        message: "Invalid joke ID format",
       });
     }
 
@@ -219,15 +223,15 @@ router.get('/:id', async (req, res) => {
       return res.json(cachedJoke);
     }
 
-    const joke = await Joke.findOne({ 
-      _id: id, 
-      isActive: true 
-    }).populate('createdBy', 'username');
+    const joke = await Joke.findOne({
+      _id: id,
+      isActive: true,
+    }).populate("createdBy", "username");
 
     if (!joke) {
       return res.status(404).json({
         success: false,
-        message: 'Joke not found'
+        message: "Joke not found",
       });
     }
 
@@ -235,46 +239,48 @@ router.get('/:id', async (req, res) => {
 
     const result = {
       success: true,
-      message: 'Joke retrieved successfully',
+      message: "Joke retrieved successfully",
       data: {
-        joke
-      }
+        joke,
+      },
     };
 
     await cache.set(cacheKey, result, 300);
 
-    logger.info('Joke viewed', { 
+    logger.info("Joke viewed", {
       jokeId: joke._id,
       views: joke.views + 1,
-      ip: req.ip 
+      ip: req.ip,
     });
 
     res.json(result);
-
   } catch (error) {
-    logger.error('Get joke error', { error: error.message, jokeId: req.params.id });
+    logger.error("Get joke error", {
+      error: error.message,
+      jokeId: req.params.id,
+    });
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 });
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { page = 1, limit = 10, category } = req.query;
-    
+
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 
     if (pageNum < 1 || limitNum < 1 || limitNum > 50) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid pagination parameters'
+        message: "Invalid pagination parameters",
       });
     }
 
-    const cacheKey = `jokes_list_${pageNum}_${limitNum}_${category || 'all'}`;
+    const cacheKey = `jokes_list_${pageNum}_${limitNum}_${category || "all"}`;
     const cachedResult = await cache.get(cacheKey);
 
     if (cachedResult) {
@@ -285,19 +291,19 @@ router.get('/', async (req, res) => {
     if (category) query.category = category;
 
     const skip = (pageNum - 1) * limitNum;
-    
+
     const [jokes, totalCount] = await Promise.all([
       Joke.find(query)
-        .populate('createdBy', 'username')
+        .populate("createdBy", "username")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum),
-      Joke.countDocuments(query)
+      Joke.countDocuments(query),
     ]);
 
     const result = {
       success: true,
-      message: 'Jokes retrieved successfully',
+      message: "Jokes retrieved successfully",
       data: {
         jokes,
         pagination: {
@@ -305,42 +311,41 @@ router.get('/', async (req, res) => {
           totalPages: Math.ceil(totalCount / limitNum),
           totalJokes: totalCount,
           hasNextPage: pageNum < Math.ceil(totalCount / limitNum),
-          hasPreviousPage: pageNum > 1
-        }
-      }
+          hasPreviousPage: pageNum > 1,
+        },
+      },
     };
 
     await cache.set(cacheKey, result, 300);
 
     res.json(result);
-
   } catch (error) {
-    logger.error('Get jokes list error', { error: error.message });
+    logger.error("Get jokes list error", { error: error.message });
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 });
 
 const buildSearchQuery = (searchParams) => {
   const query = {};
-  
+
   if (searchParams.category) {
     query.category = searchParams.category;
   }
-  
+
   if (searchParams.author) {
-    query.author = new RegExp(searchParams.author, 'i');
+    query.author = new RegExp(searchParams.author, "i");
   }
-  
+
   if (searchParams.keyword) {
     query.$or = [
-      { title: new RegExp(searchParams.keyword, 'i') },
-      { content: new RegExp(searchParams.keyword, 'i') }
+      { title: new RegExp(searchParams.keyword, "i") },
+      { content: new RegExp(searchParams.keyword, "i") },
     ];
   }
-  
+
   return query;
 };
 
