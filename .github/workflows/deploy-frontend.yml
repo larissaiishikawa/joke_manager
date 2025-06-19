@@ -1,19 +1,27 @@
-name: Deploy Frontend
+name: Deploy Frontend Only
 
 on:
   push:
     branches: [ main ]
-    paths: [ 'frontend/**' ]
-  pull_request:
-    branches: [ main ]
-    paths: [ 'frontend/**' ]
+    paths: 
+      - 'frontend/**'
+      - '!frontend/Dockerfile'
+      - '!frontend/.dockerignore'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        sparse-checkout: |
+          frontend/
+        sparse-checkout-cone-mode: false
     
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -23,20 +31,18 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
     
     - name: Install dependencies
-      run: |
-        cd frontend
-        npm ci
+      run: npm ci
     
-    - name: Build
-      run: |
-        cd frontend
-        npm run build
+    - name: Build React app
+      run: npm run build
       env:
-        REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+        REACT_APP_API_URL: https://joke-manager.vercel.app/api
+        CI: false
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/build
+        publish_dir: frontend/build
+        cname: false

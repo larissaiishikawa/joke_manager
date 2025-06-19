@@ -5,7 +5,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+COPY public/ ./public/
+COPY src/ ./src/
+COPY tsconfig.json ./
+COPY .env* ./
+
 RUN npm run build
 
 FROM nginx:alpine
