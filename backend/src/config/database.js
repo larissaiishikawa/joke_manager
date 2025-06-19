@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const connectDatabase = async () => {
   try {
@@ -6,21 +6,20 @@ const connectDatabase = async () => {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      bufferCommands: false
+      bufferCommands: false,
     });
 
     console.log(`MongoDB connected: ${connection.connection.host}`);
 
-    mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
+    mongoose.connection.on("error", (err) => {
+      console.error("MongoDB connection error:", err);
     });
 
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
+    mongoose.connection.on("disconnected", () => {
+      console.log("MongoDB disconnected");
     });
-
   } catch (error) {
-    console.error('Database connection failed:', error);
+    console.error("Database connection failed:", error);
     process.exit(1);
   }
 };

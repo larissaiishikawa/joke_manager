@@ -8,7 +8,13 @@
     "dev": "nodemon server.js",
     "test": "jest"
   },
-  "keywords": ["express", "jokes", "api", "mongodb", "jwt"],
+  "keywords": [
+    "express",
+    "jokes",
+    "api",
+    "mongodb",
+    "jwt"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
