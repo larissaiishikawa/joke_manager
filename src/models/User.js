@@ -56,8 +56,6 @@ const userSchema = new mongoose.Schema({
   versionKey: false
 });
 
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
 userSchema.index({ lockedUntil: 1 }, { sparse: true });
 
 userSchema.virtual('isLocked').get(function() {
