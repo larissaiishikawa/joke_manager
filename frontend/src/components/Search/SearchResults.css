@@ -1,0 +1,171 @@
+.search-results {
+  margin-top: 2rem;
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #fbbf24;
+  padding-bottom: 1rem;
+}
+
+.results-header h2 {
+  color: #374151;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+}
+
+.results-count {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #fbbf24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.no-results-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-results h3 {
+  color: #374151;
+  font-size: 1.5rem;
+  margin: 0 0 1rem 0;
+}
+
+.no-results p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.joke-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.page-btn {
+  background: white;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 44px;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #fbbf24;
+  background: #fef3c7;
+  transform: translateY(-1px);
+}
+
+.page-btn.active {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  border-color: #f59e0b;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.nav-btn {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  border-color: #f59e0b;
+  padding: 0.5rem 1rem;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: #d97706;
+}
+
+.page-ellipsis {
+  color: #6b7280;
+  padding: 0.5rem 0.25rem;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .results-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .pagination {
+    gap: 0.25rem;
+    padding: 1rem 0;
+  }
+  
+  .nav-btn {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .page-btn {
+    padding: 0.5rem;
+    min-width: 36px;
+  }
+}
