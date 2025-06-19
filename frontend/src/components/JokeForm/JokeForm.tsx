@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { jokesAPI } from '../../services/api';
-import './JokeForm.css';
+import React, { useState } from "react";
+import { jokesAPI } from "../../services/api";
+import "./JokeForm.css";
 
 interface JokeFormData {
   title: string;
@@ -22,21 +22,21 @@ interface JokeFormProps {
 }
 
 const CATEGORIES = [
-  { value: '', label: 'Selecione uma categoria' },
-  { value: 'comedy', label: 'Comédia' },
-  { value: 'puns', label: 'Trocadilhos' },
-  { value: 'dad-jokes', label: 'Piadas de Pai' },
-  { value: 'programming', label: 'Programação' },
-  { value: 'dark-humor', label: 'Humor Negro' },
-  { value: 'one-liner', label: 'Uma Linha' },
+  { value: "", label: "Selecione uma categoria" },
+  { value: "comedy", label: "Comédia" },
+  { value: "puns", label: "Trocadilhos" },
+  { value: "dad-jokes", label: "Piadas de Pai" },
+  { value: "programming", label: "Programação" },
+  { value: "dark-humor", label: "Humor Negro" },
+  { value: "one-liner", label: "Uma Linha" },
 ];
 
 const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
   const [formData, setFormData] = useState<JokeFormData>({
-    title: '',
-    content: '',
-    category: '',
-    author: '',
+    title: "",
+    content: "",
+    category: "",
+    author: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -46,40 +46,44 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
     const newErrors: FormErrors = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Título é obrigatório';
+      newErrors.title = "Título é obrigatório";
     } else if (formData.title.length > 200) {
-      newErrors.title = 'Título não pode exceder 200 caracteres';
+      newErrors.title = "Título não pode exceder 200 caracteres";
     }
 
     if (!formData.content.trim()) {
-      newErrors.content = 'Conteúdo é obrigatório';
+      newErrors.content = "Conteúdo é obrigatório";
     } else if (formData.content.length > 1000) {
-      newErrors.content = 'Conteúdo não pode exceder 1000 caracteres';
+      newErrors.content = "Conteúdo não pode exceder 1000 caracteres";
     }
 
     if (!formData.category) {
-      newErrors.category = 'Categoria é obrigatória';
+      newErrors.category = "Categoria é obrigatória";
     }
 
     if (!formData.author.trim()) {
-      newErrors.author = 'Autor é obrigatório';
+      newErrors.author = "Autor é obrigatório";
     } else if (formData.author.length > 100) {
-      newErrors.author = 'Nome do autor não pode exceder 100 caracteres';
+      newErrors.author = "Nome do autor não pode exceder 100 caracteres";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
 
     if (errors[name as keyof FormErrors]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         [name]: undefined,
       }));
@@ -92,7 +96,7 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -110,21 +114,22 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
 
       if (response.success) {
         setFormData({
-          title: '',
-          content: '',
-          category: '',
-          author: '',
+          title: "",
+          content: "",
+          category: "",
+          author: "",
         });
         setShowSuccess(true);
-        
+
         if (onSuccess) {
           onSuccess();
         }
       } else {
-        setErrors({ general: response.message || 'Erro ao criar piada' });
+        setErrors({ general: response.message || "Erro ao criar piada" });
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Erro de conexão. Tente novamente.';
+      const errorMessage =
+        error.response?.data?.message || "Erro de conexão. Tente novamente.";
       setErrors({ general: errorMessage });
     } finally {
       setIsLoading(false);
@@ -134,17 +139,13 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
   return (
     <div className="joke-form-container">
       <h2>Adicionar Nova Piada</h2>
-      
+
       {showSuccess && (
-        <div className="success-message">
-          🎉 Piada adicionada com sucesso!
-        </div>
+        <div className="success-message">🎉 Piada adicionada com sucesso!</div>
       )}
 
       {errors.general && (
-        <div className="error-message general-error">
-          {errors.general}
-        </div>
+        <div className="error-message general-error">{errors.general}</div>
       )}
 
       <form onSubmit={handleSubmit} className="joke-form">
@@ -156,14 +157,12 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
             name="title"
             value={formData.title}
             onChange={handleInputChange}
-            className={errors.title ? 'error' : ''}
+            className={errors.title ? "error" : ""}
             placeholder="Digite o título da piada..."
             disabled={isLoading}
             maxLength={200}
           />
-          <div className="char-counter">
-            {formData.title.length}/200
-          </div>
+          <div className="char-counter">{formData.title.length}/200</div>
           {errors.title && (
             <span className="error-message">{errors.title}</span>
           )}
@@ -176,15 +175,13 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
             name="content"
             value={formData.content}
             onChange={handleInputChange}
-            className={errors.content ? 'error' : ''}
+            className={errors.content ? "error" : ""}
             placeholder="Digite o conteúdo da piada..."
             disabled={isLoading}
             rows={4}
             maxLength={1000}
           />
-          <div className="char-counter">
-            {formData.content.length}/1000
-          </div>
+          <div className="char-counter">{formData.content.length}/1000</div>
           {errors.content && (
             <span className="error-message">{errors.content}</span>
           )}
@@ -198,10 +195,10 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className={errors.category ? 'error' : ''}
+              className={errors.category ? "error" : ""}
               disabled={isLoading}
             >
-              {CATEGORIES.map(cat => (
+              {CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>
                   {cat.label}
                 </option>
@@ -220,26 +217,20 @@ const JokeForm: React.FC<JokeFormProps> = ({ onSuccess }) => {
               name="author"
               value={formData.author}
               onChange={handleInputChange}
-              className={errors.author ? 'error' : ''}
+              className={errors.author ? "error" : ""}
               placeholder="Nome do autor..."
               disabled={isLoading}
               maxLength={100}
             />
-            <div className="char-counter">
-              {formData.author.length}/100
-            </div>
+            <div className="char-counter">{formData.author.length}/100</div>
             {errors.author && (
               <span className="error-message">{errors.author}</span>
             )}
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          className="submit-btn"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Adicionando...' : 'Adicionar Piada'}
+        <button type="submit" className="submit-btn" disabled={isLoading}>
+          {isLoading ? "Adicionando..." : "Adicionar Piada"}
         </button>
       </form>
     </div>

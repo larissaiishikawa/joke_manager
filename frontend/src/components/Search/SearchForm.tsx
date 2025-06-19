@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './SearchForm.css';
+import React, { useState } from "react";
+import "./SearchForm.css";
 
 export interface SearchFilters {
   category: string;
@@ -13,25 +13,27 @@ interface SearchFormProps {
 }
 
 const CATEGORIES = [
-  { value: '', label: 'Todas as categorias' },
-  { value: 'comedy', label: 'Comédia' },
-  { value: 'puns', label: 'Trocadilhos' },
-  { value: 'dad-jokes', label: 'Piadas de Pai' },
-  { value: 'programming', label: 'Programação' },
-  { value: 'dark-humor', label: 'Humor Negro' },
-  { value: 'one-liner', label: 'Uma Linha' },
+  { value: "", label: "Todas as categorias" },
+  { value: "comedy", label: "Comédia" },
+  { value: "puns", label: "Trocadilhos" },
+  { value: "dad-jokes", label: "Piadas de Pai" },
+  { value: "programming", label: "Programação" },
+  { value: "dark-humor", label: "Humor Negro" },
+  { value: "one-liner", label: "Uma Linha" },
 ];
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
   const [filters, setFilters] = useState<SearchFilters>({
-    category: '',
-    keyword: '',
-    author: '',
+    category: "",
+    keyword: "",
+    author: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -44,9 +46,9 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
 
   const handleClear = () => {
     const clearedFilters = {
-      category: '',
-      keyword: '',
-      author: '',
+      category: "",
+      keyword: "",
+      author: "",
     };
     setFilters(clearedFilters);
     onSearch(clearedFilters);
@@ -66,12 +68,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
             disabled={isLoading}
           />
         </div>
-        <button 
-          type="submit" 
-          className="search-btn"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Pesquisando...' : 'Pesquisar'}
+        <button type="submit" className="search-btn" disabled={isLoading}>
+          {isLoading ? "Pesquisando..." : "Pesquisar"}
         </button>
       </div>
 
@@ -86,7 +84,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
             className="filter-select"
             disabled={isLoading}
           >
-            {CATEGORIES.map(cat => (
+            {CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
               </option>
@@ -108,8 +106,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
           />
         </div>
 
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={handleClear}
           className="clear-btn"
           disabled={isLoading}
@@ -119,7 +117,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
       </div>
 
       <div className="search-tip">
-        💡 <strong>Dica:</strong> Escolha o idioma inglês para obter melhores resultados. A API possui mais piadas disponíveis em inglês.
+        💡 <strong>Dica:</strong> Escolha o idioma inglês para obter melhores
+        resultados. A API possui mais piadas disponíveis em inglês.
       </div>
     </form>
   );

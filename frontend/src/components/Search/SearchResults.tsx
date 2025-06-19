@@ -1,6 +1,6 @@
-import React from 'react';
-import JokeCard, { Joke } from '../JokeCard/JokeCard';
-import './SearchResults.css';
+import React from "react";
+import JokeCard, { Joke } from "../JokeCard/JokeCard";
+import "./SearchResults.css";
 
 export interface PaginationInfo {
   currentPage: number;
@@ -42,7 +42,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <div className="no-results">
           <div className="no-results-icon">😅</div>
           <h3>Nenhuma piada encontrada</h3>
-          <p>Tente ajustar os filtros de busca ou pesquisar por outras palavras-chave.</p>
+          <p>
+            Tente ajustar os filtros de busca ou pesquisar por outras
+            palavras-chave.
+          </p>
         </div>
       </div>
     );
@@ -70,7 +73,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         </button>
       );
       if (startPage > 2) {
-        pages.push(<span key="start-ellipsis" className="page-ellipsis">...</span>);
+        pages.push(
+          <span key="start-ellipsis" className="page-ellipsis">
+            ...
+          </span>
+        );
       }
     }
 
@@ -79,7 +86,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <button
           key={i}
           onClick={() => onPageChange(i)}
-          className={`page-btn ${i === currentPage ? 'active' : ''}`}
+          className={`page-btn ${i === currentPage ? "active" : ""}`}
         >
           {i}
         </button>
@@ -88,10 +95,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
-        pages.push(<span key="end-ellipsis" className="page-ellipsis">...</span>);
+        pages.push(
+          <span key="end-ellipsis" className="page-ellipsis">
+            ...
+          </span>
+        );
       }
       pages.push(
-        <button key={totalPages} onClick={() => onPageChange(totalPages)} className="page-btn">
+        <button
+          key={totalPages}
+          onClick={() => onPageChange(totalPages)}
+          className="page-btn"
+        >
           {totalPages}
         </button>
       );
@@ -106,11 +121,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         >
           ← Anterior
         </button>
-        
-        <div className="page-numbers">
-          {pages}
-        </div>
-        
+
+        <div className="page-numbers">{pages}</div>
+
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!pagination.hasNextPage}
@@ -127,20 +140,20 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       <div className="results-header">
         <h2>Encontre Piadas</h2>
         <p className="results-count">
-          {pagination.totalJokes} piada{pagination.totalJokes !== 1 ? 's' : ''} encontrada{pagination.totalJokes !== 1 ? 's' : ''}
+          {pagination.totalJokes} piada{pagination.totalJokes !== 1 ? "s" : ""}{" "}
+          encontrada{pagination.totalJokes !== 1 ? "s" : ""}
           {pagination.totalPages > 1 && (
-            <> • Página {pagination.currentPage} de {pagination.totalPages}</>
+            <>
+              {" "}
+              • Página {pagination.currentPage} de {pagination.totalPages}
+            </>
           )}
         </p>
       </div>
 
       <div className="joke-grid">
-        {jokes.map(joke => (
-          <JokeCard
-            key={joke._id}
-            joke={joke}
-            onClick={onJokeClick}
-          />
+        {jokes.map((joke) => (
+          <JokeCard key={joke._id} joke={joke} onClick={onJokeClick} />
         ))}
       </div>
 
