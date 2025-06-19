@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { getAuthState, subscribeToAuthChanges } from '../../utils/auth';
+import React, { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { getAuthState, subscribeToAuthChanges } from "../../utils/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

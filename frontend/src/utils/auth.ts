@@ -1,4 +1,4 @@
-import { setAuthToken } from '../services/api';
+import { setAuthToken } from "../services/api";
 
 export interface User {
   id: string;
@@ -21,7 +21,7 @@ let authState: AuthState = {
 const listeners: (() => void)[] = [];
 
 const notifyListeners = () => {
-  listeners.forEach(listener => listener());
+  listeners.forEach((listener) => listener());
 };
 
 export const subscribeToAuthChanges = (listener: () => void) => {
@@ -44,7 +44,7 @@ export const setAuthData = (user: User | null, token: string | null) => {
     token,
     isAuthenticated: !!(user && token),
   };
-  
+
   setAuthToken(token);
   notifyListeners();
 };

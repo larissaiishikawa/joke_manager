@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../../services/api';
-import { clearAuth, getAuthState, getCurrentUser, subscribeToAuthChanges } from '../../utils/auth';
-import './Header.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authAPI } from "../../services/api";
+import {
+  clearAuth,
+  getAuthState,
+  getCurrentUser,
+  subscribeToAuthChanges,
+} from "../../utils/auth";
+import "./Header.css";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -22,18 +27,18 @@ const Header: React.FC = () => {
     try {
       await authAPI.logout();
       clearAuth();
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       clearAuth();
-      navigate('/login');
+      navigate("/login");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleHomeClick = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   if (!getAuthState().isAuthenticated) {
@@ -47,15 +52,15 @@ const Header: React.FC = () => {
           <h1>O Piadista</h1>
           <p>Gerador de piadas aleatórias em Português</p>
         </div>
-        
+
         <div className="header-user">
           <span className="user-welcome">Olá, {user?.username}!</span>
-          <button 
+          <button
             onClick={handleLogout}
             disabled={isLoading}
             className="logout-btn"
           >
-            {isLoading ? 'Saindo...' : 'Sair'}
+            {isLoading ? "Saindo..." : "Sair"}
           </button>
         </div>
       </div>
