@@ -168,7 +168,7 @@ router.post("/", authMiddleware, createLimiter, async (req, res) => {
     await newJoke.save();
     await newJoke.populate("createdBy", "username");
 
-    await cache.del("search_*");
+    await invalidateJokesCaches();
 
     logger.info("New joke created", {
       jokeId: newJoke._id,
@@ -216,13 +216,6 @@ router.get("/:id", async (req, res) => {
       });
     }
 
-    const cacheKey = `joke_${id}`;
-    const cachedJoke = await cache.get(cacheKey);
-
-    if (cachedJoke) {
-      return res.json(cachedJoke);
-    }
-
     const joke = await Joke.findOne({
       _id: id,
       isActive: true,
@@ -244,8 +237,6 @@ router.get("/:id", async (req, res) => {
         joke,
       },
     };
-
-    await cache.set(cacheKey, result, 300);
 
     logger.info("Joke viewed", {
       jokeId: joke._id,
@@ -280,13 +271,6 @@ router.get("/", async (req, res) => {
       });
     }
 
-    const cacheKey = `jokes_list_${pageNum}_${limitNum}_${category || "all"}`;
-    const cachedResult = await cache.get(cacheKey);
-
-    if (cachedResult) {
-      return res.json(cachedResult);
-    }
-
     const query = { isActive: true };
     if (category) query.category = category;
 
@@ -315,8 +299,6 @@ router.get("/", async (req, res) => {
         },
       },
     };
-
-    await cache.set(cacheKey, result, 300);
 
     res.json(result);
   } catch (error) {
@@ -348,5 +330,27 @@ const buildSearchQuery = (searchParams) => {
 
   return query;
 };
+
+async function invalidateJokesCaches() {
+  try {
+    if (!cache.isConnected || !cache.client) {
+      return;
+    }
+
+    const searchKeys = await cache.client.keys("search_*");
+
+    if (searchKeys.length > 0) {
+      await cache.client.del(searchKeys);
+      logger.info(
+        `Search cache invalidated: ${searchKeys.length} keys deleted`,
+        {
+          keys: searchKeys,
+        }
+      );
+    }
+  } catch (error) {
+    logger.error("Error invalidating search caches:", error);
+  }
+}
 
 module.exports = router;
