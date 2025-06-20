@@ -87,7 +87,7 @@ const Login: React.FC = () => {
     <div className="login-container">
       <div className="login-header">
         <h1>O Piadista</h1>
-        <p>Gerador de piadas aleatórias em Português</p>
+        <p>Onde o humor é gratuito... e às vezes até engraçado</p>
       </div>
 
       <form onSubmit={handleSubmit} className="login-form">
