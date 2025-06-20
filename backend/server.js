@@ -19,7 +19,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? process.env.CORS_ORIGIN || "https://larissaiishikawa.github.io"
+        ? process.env.FRONTEND_URL || process.env.CORS_ORIGIN
         : ["http://localhost:3001", "http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -39,6 +39,25 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 Database.connect();
+
+// Health check route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Joke Manager API is running!",
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    message: "API Health Check",
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
 
 app.use("/api", routes);
 
