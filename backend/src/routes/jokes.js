@@ -66,7 +66,7 @@ router.get("/search", searchLimiter, async (req, res) => {
     const options = {
       skip,
       limit: limitNum,
-      sort: { createdAt: -1 },
+      ...(keyword ? {} : { sort: { createdAt: -1 } }),
     };
 
     const [jokes, totalCount] = await Promise.all([
@@ -246,10 +246,56 @@ router.get("/:id", async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    logger.error("Get joke error", {
-      error: error.message,
-      jokeId: req.params.id,
+    logger.error("Get joke error", { error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
+  }
+});
+
+router.post("/:id/like", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid joke ID format",
+      });
+    }
+
+    const joke = await Joke.findOne({
+      _id: id,
+      isActive: true,
+    });
+
+    if (!joke) {
+      return res.status(404).json({
+        success: false,
+        message: "Joke not found",
+      });
+    }
+
+    joke.likes += 1;
+    await joke.save();
+
+    logger.info("Joke liked", {
+      jokeId: joke._id,
+      likes: joke.likes,
+      userId: req.user.userId,
+      ip: req.ip,
+    });
+
+    res.json({
+      success: true,
+      message: "Joke liked successfully",
+      data: {
+        likes: joke.likes,
+      },
+    });
+  } catch (error) {
+    logger.error("Like joke error", { error: error.message });
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -322,9 +368,15 @@ const buildSearchQuery = (searchParams) => {
   }
 
   if (searchParams.keyword) {
+    const keyword = searchParams.keyword.trim();
+
     query.$or = [
-      { title: new RegExp(searchParams.keyword, "i") },
-      { content: new RegExp(searchParams.keyword, "i") },
+      { title: new RegExp(`^${keyword}`, "i") },
+      { content: new RegExp(`^${keyword}`, "i") },
+      { title: new RegExp(`\\b${keyword}\\b`, "i") },
+      { content: new RegExp(`\\b${keyword}\\b`, "i") },
+      { title: new RegExp(keyword, "i") },
+      { content: new RegExp(keyword, "i") },
     ];
   }
 

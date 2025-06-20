@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./JokeCard.css";
 
 export interface Joke {
@@ -19,12 +19,31 @@ export interface Joke {
 interface JokeCardProps {
   joke: Joke;
   onClick?: (joke: Joke) => void;
+  onLike?: (jokeId: string) => void;
 }
 
-const JokeCard: React.FC<JokeCardProps> = ({ joke, onClick }) => {
-  const handleClick = () => {
+const JokeCard: React.FC<JokeCardProps> = ({ joke, onClick, onLike }) => {
+  const [currentViews, setCurrentViews] = useState(joke.views);
+  const [currentLikes, setCurrentLikes] = useState(joke.likes);
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleCardClick = () => {
     if (onClick) {
+      setCurrentViews((prev) => prev + 1);
       onClick(joke);
+    }
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!isLiked) {
+      setCurrentLikes((prev) => prev + 1);
+      setIsLiked(true);
+
+      if (onLike) {
+        onLike(joke._id);
+      }
     }
   };
 
@@ -48,7 +67,7 @@ const JokeCard: React.FC<JokeCardProps> = ({ joke, onClick }) => {
   return (
     <div
       className={`joke-card ${onClick ? "clickable" : ""}`}
-      onClick={handleClick}
+      onClick={handleCardClick}
     >
       <div className="joke-header">
         <h3 className="joke-title">{joke.title}</h3>
@@ -68,7 +87,14 @@ const JokeCard: React.FC<JokeCardProps> = ({ joke, onClick }) => {
         </div>
         <div className="joke-meta">
           <span className="joke-stats">
-            👀 {joke.views} • ❤️ {joke.likes}
+            👀 {currentViews} •
+            <button
+              className={`like-button ${isLiked ? "liked" : ""}`}
+              onClick={handleLikeClick}
+              title="Curtir piada"
+            >
+              ❤️ {currentLikes}
+            </button>
           </span>
           <span className="joke-date">{formatDate(joke.createdAt)}</span>
         </div>

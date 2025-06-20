@@ -16,6 +16,7 @@ interface SearchResultsProps {
   isLoading: boolean;
   onPageChange: (page: number) => void;
   onJokeClick?: (joke: Joke) => void;
+  onJokeLike?: (jokeId: string) => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({
@@ -24,6 +25,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   isLoading,
   onPageChange,
   onJokeClick,
+  onJokeLike,
 }) => {
   if (isLoading) {
     return (
@@ -153,7 +155,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
       <div className="joke-grid">
         {jokes.map((joke) => (
-          <JokeCard key={joke._id} joke={joke} onClick={onJokeClick} />
+          <JokeCard
+            key={joke._id}
+            joke={joke}
+            onClick={onJokeClick}
+            onLike={onJokeLike}
+          />
         ))}
       </div>
 

@@ -81,6 +81,11 @@ export const jokesAPI = {
     return response.data;
   },
 
+  like: async (id: string) => {
+    const response = await api.post(`/jokes/${id}/like`);
+    return response.data;
+  },
+
   getAll: async (params: {
     page?: number;
     limit?: number;

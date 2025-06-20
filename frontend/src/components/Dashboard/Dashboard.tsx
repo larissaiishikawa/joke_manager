@@ -84,10 +84,33 @@ const Dashboard: React.FC = () => {
 
   const handleJokeClick = async (joke: Joke) => {
     try {
-      await jokesAPI.getById(joke._id);
+      const response = await jokesAPI.getById(joke._id);
+      if (response.success) {
+        setJokes((prevJokes) =>
+          prevJokes.map((j) =>
+            j._id === joke._id ? { ...j, views: response.data.joke.views } : j
+          )
+        );
+      }
       console.log("Joke viewed:", joke.title);
     } catch (error) {
       console.error("Error viewing joke:", error);
+    }
+  };
+
+  const handleJokeLike = async (jokeId: string) => {
+    try {
+      const response = await jokesAPI.like(jokeId);
+      if (response.success) {
+        setJokes((prevJokes) =>
+          prevJokes.map((joke) =>
+            joke._id === jokeId ? { ...joke, likes: response.data.likes } : joke
+          )
+        );
+      }
+      console.log("Joke liked!");
+    } catch (error) {
+      console.error("Error liking joke:", error);
     }
   };
 
@@ -120,6 +143,7 @@ const Dashboard: React.FC = () => {
                 isLoading={isLoading}
                 onPageChange={handlePageChange}
                 onJokeClick={handleJokeClick}
+                onJokeLike={handleJokeLike}
               />
             </div>
           )}

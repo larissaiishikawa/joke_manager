@@ -50,7 +50,7 @@ const Header: React.FC = () => {
       <div className="header-container">
         <div className="header-brand" onClick={handleHomeClick}>
           <h1>O Piadista</h1>
-          <p>Gerador de piadas aleatórias em Português</p>
+          <p>Onde o humor é gratuito... e às vezes até engraçado</p>
         </div>
 
         <div className="header-user">
