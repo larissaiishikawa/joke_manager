@@ -3,7 +3,6 @@
   "outputDirectory": "frontend/build",
   "installCommand": "cd frontend && npm install",
   "ignoreCommand": "git diff --quiet HEAD^ HEAD ./frontend/",
-  "functions": {},
   "rewrites": [
     {
       "source": "/(.*)",
