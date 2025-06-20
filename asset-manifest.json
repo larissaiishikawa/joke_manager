@@ -1,0 +1,12 @@
+{
+  "files": {
+    "main.css": "/joke_manager/static/css/main.e3631fb2.css",
+    "main.js": "/joke_manager/static/js/main.4f41cc05.js",
+    "static/js/206.ed2f3d44.chunk.js": "/joke_manager/static/js/206.ed2f3d44.chunk.js",
+    "index.html": "/joke_manager/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.e3631fb2.css",
+    "static/js/main.4f41cc05.js"
+  ]
+}
