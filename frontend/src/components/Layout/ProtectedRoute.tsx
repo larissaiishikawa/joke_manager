@@ -1,23 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { getAuthState, subscribeToAuthChanges } from "../../utils/auth";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [authState, setAuthState] = useState(getAuthState());
+  const { isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = subscribeToAuthChanges(() => {
-      setAuthState(getAuthState());
-    });
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        Carregando...
+      </div>
+    );
+  }
 
-    return unsubscribe;
-  }, []);
-
-  if (!authState.isAuthenticated) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 

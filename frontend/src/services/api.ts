@@ -22,7 +22,11 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       setAuthToken(null);
-      window.location.href = "/login";
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

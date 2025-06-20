@@ -1,38 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { authAPI } from "../../services/api";
-import {
-  clearAuth,
-  getAuthState,
-  getCurrentUser,
-  subscribeToAuthChanges,
-} from "../../utils/auth";
 import "./Header.css";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getCurrentUser());
+  const { user, isAuthenticated, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToAuthChanges(() => {
-      setUser(getCurrentUser());
-    });
-
-    return unsubscribe;
-  }, []);
 
   const handleLogout = async () => {
     setIsLoading(true);
     try {
       await authAPI.logout();
-      clearAuth();
-      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
-      clearAuth();
-      navigate("/login");
     } finally {
+      logout();
+      navigate("/login");
       setIsLoading(false);
     }
   };
@@ -41,7 +26,7 @@ const Header: React.FC = () => {
     navigate("/dashboard");
   };
 
-  if (!getAuthState().isAuthenticated) {
+  if (!isAuthenticated) {
     return null;
   }
 

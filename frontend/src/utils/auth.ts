@@ -12,11 +12,33 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-let authState: AuthState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
+const initializeAuthState = (): AuthState => {
+  const savedToken = localStorage.getItem("auth_token");
+  const savedUser = localStorage.getItem("auth_user");
+
+  if (savedToken && savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
+      setAuthToken(savedToken);
+      return {
+        user,
+        token: savedToken,
+        isAuthenticated: true,
+      };
+    } catch {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+    }
+  }
+
+  return {
+    user: null,
+    token: null,
+    isAuthenticated: false,
+  };
 };
+
+let authState: AuthState = initializeAuthState();
 
 const listeners: (() => void)[] = [];
 
@@ -44,6 +66,14 @@ export const setAuthData = (user: User | null, token: string | null) => {
     token,
     isAuthenticated: !!(user && token),
   };
+
+  if (user && token) {
+    localStorage.setItem("auth_token", token);
+    localStorage.setItem("auth_user", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
+  }
 
   setAuthToken(token);
   notifyListeners();

@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { authAPI } from "../../services/api";
-import { setAuthData } from "../../utils/auth";
+import { useAuth } from "../../contexts/AuthContext";
 import "./Login.css";
 
 interface LoginFormData {
@@ -17,12 +16,19 @@ interface FormErrors {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -66,25 +72,15 @@ const Login: React.FC = () => {
     setIsLoading(true);
     setErrors({});
 
-    try {
-      const response = await authAPI.login({
-        email: formData.email,
-        password: formData.password,
-      });
+    const result = await login(formData.email, formData.password);
 
-      if (response.success) {
-        setAuthData(response.data.user, response.data.token);
-        navigate("/dashboard");
-      } else {
-        setErrors({ general: response.message || "Erro no login" });
-      }
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Erro de conexão. Tente novamente.";
-      setErrors({ general: errorMessage });
-    } finally {
-      setIsLoading(false);
+    if (result.success) {
+      navigate("/dashboard");
+    } else {
+      setErrors({ general: result.message || "Erro no login" });
     }
+
+    setIsLoading(false);
   };
 
   return (
