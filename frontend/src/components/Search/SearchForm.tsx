@@ -115,11 +115,6 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, isLoading }) => {
           Limpar
         </button>
       </div>
-
-      <div className="search-tip">
-        💡 <strong>Dica:</strong> Escolha o idioma inglês para obter melhores
-        resultados. A API possui mais piadas disponíveis em inglês.
-      </div>
     </form>
   );
 };
