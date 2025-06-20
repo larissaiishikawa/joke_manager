@@ -32,7 +32,7 @@ jobs:
         cd frontend
         npm run build
       env:
-        REACT_APP_API_URL: https://joke-manager-production.up.railway.app/api
+        REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
         CI: false
         GENERATE_SOURCEMAP: false
     
