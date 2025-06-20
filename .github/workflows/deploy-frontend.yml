@@ -1,0 +1,56 @@
+name: Deploy Frontend Only
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'frontend/**' ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci --prefer-offline --no-audit
+    
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+      env:
+        REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL || 'http://localhost:3000/api' }}
+        CI: false
+        GENERATE_SOURCEMAP: false
+        PUBLIC_URL: /joke_manager
+    
+    - name: Debug build contents
+      run: |
+        echo "=== Current directory ==="
+        pwd
+        echo "=== Listing all files ==="
+        find . -name "index.html" -type f
+        echo "=== Frontend build directory ==="
+        ls -la frontend/build/ || echo "Build directory not found"
+        echo "=== Testing build path ==="
+        test -f "frontend/build/index.html" && echo "✅ React build found" || echo "❌ React build NOT found"
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: frontend/build
+        force_orphan: true
+        enable_jekyll: false
+        destination_dir: .
