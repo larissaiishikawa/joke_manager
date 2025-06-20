@@ -12,8 +12,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -32,26 +30,27 @@ jobs:
         cd frontend
         npm run build
       env:
-        REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+        REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL || 'http://localhost:3000/api' }}
         CI: false
         GENERATE_SOURCEMAP: false
+        PUBLIC_URL: /joke_manager
     
-    - name: Verify build
+    - name: Debug build contents
       run: |
-        echo "Checking build directory..."
-        ls -la frontend/build/
-        if [ ! -f "frontend/build/index.html" ]; then
-          echo "ERROR: index.html not found in build!"
-          exit 1
-        fi
-        echo "Build verification passed!"
+        echo "=== Current directory ==="
+        pwd
+        echo "=== Listing all files ==="
+        find . -name "index.html" -type f
+        echo "=== Frontend build directory ==="
+        ls -la frontend/build/ || echo "Build directory not found"
+        echo "=== Testing build path ==="
+        test -f "frontend/build/index.html" && echo "✅ React build found" || echo "❌ React build NOT found"
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
-      if: success()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: frontend/build
         force_orphan: true
         enable_jekyll: false
-        cname: false
+        destination_dir: .

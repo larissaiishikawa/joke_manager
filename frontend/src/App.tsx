@@ -13,7 +13,7 @@ import "./App.css";
 
 function App() {
   return (
-    <Router>
+    <Router basename="/joke_manager">
       <div className="App">
         <Header />
         <main className="main-content">
