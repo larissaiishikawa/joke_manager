@@ -54,6 +54,10 @@ if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+} else {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Production server running on port ${PORT}`);
+  });
 }
 
 module.exports = app;

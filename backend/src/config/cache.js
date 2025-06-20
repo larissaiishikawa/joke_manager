@@ -1,4 +1,4 @@
-const redis = require('redis');
+const redis = require("redis");
 
 class CacheManager {
   constructor() {
@@ -8,36 +8,40 @@ class CacheManager {
 
   async connect() {
     try {
+      if (!process.env.REDIS_HOST) {
+        console.log("Redis not configured, skipping cache");
+        return;
+      }
+
       this.client = redis.createClient({
-        host: process.env.REDIS_HOST || 'localhost',
+        host: process.env.REDIS_HOST || "localhost",
         port: process.env.REDIS_PORT || 6379,
         password: process.env.REDIS_PASSWORD || undefined,
         retry_strategy: (options) => {
-          if (options.error && options.error.code === 'ECONNREFUSED') {
-            return new Error('Redis server connection refused');
+          if (options.error && options.error.code === "ECONNREFUSED") {
+            return new Error("Redis server connection refused");
           }
           if (options.times_connected > 10) {
             return undefined;
           }
           return Math.min(options.attempt * 100, 3000);
-        }
+        },
       });
 
       await this.client.connect();
       this.isConnected = true;
-      console.log('Redis connected successfully');
+      console.log("Redis connected successfully");
 
-      this.client.on('error', (err) => {
-        console.error('Redis error:', err);
+      this.client.on("error", (err) => {
+        console.error("Redis error:", err);
         this.isConnected = false;
       });
 
-      this.client.on('reconnecting', () => {
-        console.log('Redis reconnecting...');
+      this.client.on("reconnecting", () => {
+        console.log("Redis reconnecting...");
       });
-
     } catch (error) {
-      console.error('Redis connection failed:', error);
+      console.error("Redis connection failed:", error);
       this.isConnected = false;
     }
   }
@@ -48,7 +52,7 @@ class CacheManager {
       const value = await this.client.get(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
-      console.error('Cache get error:', error);
+      console.error("Cache get error:", error);
       return null;
     }
   }
@@ -59,7 +63,7 @@ class CacheManager {
       await this.client.setEx(key, ttl, JSON.stringify(value));
       return true;
     } catch (error) {
-      console.error('Cache set error:', error);
+      console.error("Cache set error:", error);
       return false;
     }
   }
@@ -70,7 +74,7 @@ class CacheManager {
       await this.client.del(key);
       return true;
     } catch (error) {
-      console.error('Cache delete error:', error);
+      console.error("Cache delete error:", error);
       return false;
     }
   }
@@ -81,7 +85,7 @@ class CacheManager {
       await this.client.flushAll();
       return true;
     } catch (error) {
-      console.error('Cache flush error:', error);
+      console.error("Cache flush error:", error);
       return false;
     }
   }
