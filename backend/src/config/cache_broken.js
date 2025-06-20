@@ -14,7 +14,7 @@ class CacheManager {
       }
 
       const redisUrl = `redis://:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;
-
+      
       this.client = redis.createClient({
         url: redisUrl,
         socket: {
@@ -24,7 +24,11 @@ class CacheManager {
               return false;
             }
             return Math.min(retries * 50, 500);
-          },
+          }
+        }
+      });
+          }
+          return Math.min(options.attempt * 100, 3000);
         },
       });
 
@@ -47,9 +51,7 @@ class CacheManager {
   }
 
   async get(key) {
-    if (!this.isConnected || !this.client) {
-      return null;
-    }
+    if (!this.isConnected) return null;
     try {
       const value = await this.client.get(key);
       return value ? JSON.parse(value) : null;
@@ -60,9 +62,7 @@ class CacheManager {
   }
 
   async set(key, value, ttl = 300) {
-    if (!this.isConnected || !this.client) {
-      return false;
-    }
+    if (!this.isConnected) return false;
     try {
       await this.client.setEx(key, ttl, JSON.stringify(value));
       return true;
@@ -73,9 +73,7 @@ class CacheManager {
   }
 
   async del(key) {
-    if (!this.isConnected || !this.client) {
-      return false;
-    }
+    if (!this.isConnected) return false;
     try {
       await this.client.del(key);
       return true;
@@ -86,11 +84,9 @@ class CacheManager {
   }
 
   async flush() {
-    if (!this.isConnected || !this.client) {
-      return false;
-    }
+    if (!this.isConnected) return false;
     try {
-      await this.client.flushDb();
+      await this.client.flushAll();
       return true;
     } catch (error) {
       console.error("Cache flush error:", error);
@@ -99,4 +95,6 @@ class CacheManager {
   }
 }
 
-module.exports = new CacheManager();
+const cache = new CacheManager();
+
+module.exports = cache;
