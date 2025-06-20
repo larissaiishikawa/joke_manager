@@ -1,4 +1,4 @@
-name: Deploy Frontend
+name: Deploy Frontend Only
 
 on:
   push:
@@ -6,34 +6,52 @@ on:
     paths: [ 'frontend/**' ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
     
-    - name: Install dependencies
-      working-directory: frontend
-      run: npm ci
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci --prefer-offline --no-audit
     
-    - name: Build React app
-      working-directory: frontend
-      run: npm run build
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
       env:
-        REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+        REACT_APP_API_URL: https://joke-manager-production.up.railway.app/api
         CI: false
+        GENERATE_SOURCEMAP: false
+    
+    - name: Verify build
+      run: |
+        echo "Checking build directory..."
+        ls -la frontend/build/
+        if [ ! -f "frontend/build/index.html" ]; then
+          echo "ERROR: index.html not found in build!"
+          exit 1
+        fi
+        echo "Build verification passed!"
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
+      if: success()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: frontend/build
+        force_orphan: true
+        enable_jekyll: false
+        cname: false
